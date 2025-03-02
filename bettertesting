@@ -1,0 +1,136 @@
+import tkinter as tk
+from tkinter import ttk
+import random as rm
+import subprocess
+import time
+import threading
+
+def get_chrome_tab_count():
+    script = '''
+    tell application "Google Chrome"
+        set tabCount to 0
+        repeat with w in windows
+            set tabCount to tabCount + (count of tabs in w)
+        end repeat
+        return tabCount
+    end tell
+    '''
+    try:
+        result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
+        return int(result.stdout.strip())
+    except ValueError:
+        return 0
+
+brainrot_terms = {
+    "rizz": "charisma",
+    "gyatt": "gluteus maximus",
+    "cap": "lie",
+    "no cap": "truth",
+    "sus": "suspicious",
+    "drip": "style",
+    "bet": "okay",
+    "lit": "exciting",
+    "fam": "family",
+    "goat": "greatest of all time"
+}
+
+entry = None
+currentsafe = None
+root = tk.Tk()   
+root.withdraw()
+jover = False
+
+def check():
+    global entry, currentsafe, result_label, jover
+    result = entry.get()
+    if result == currentsafe:
+        result_label.config(text="You are safe for now...", foreground="green")
+    else:
+        result_label.config(text="I'm sorry little one... The correct answer was: {currentsafe}", foreground="red")
+        KILL()
+        root.after(3000, root.destroy)
+        jover = True
+
+def spawn_tkinter():
+    global entry, currentsafe, result_label, jover, root
+
+    root.title("Brain Rot Trainer")
+    half_screen_width = root.winfo_screenwidth() // 2
+    half_screen_height = root.winfo_screenheight() // 2
+    
+    half_screen_height = half_screen_height + rm.randint(-100, 100)
+    half_screen_width = half_screen_width + rm.randint(-100, 100)
+    root.geometry(f"600x300+{half_screen_width}+{half_screen_height}")
+    
+    root.resizable(False, False)
+    
+    term = rm.choice(list(brainrot_terms.keys()))
+    currentsafe = brainrot_terms[term]
+    
+    term1 = ttk.Label(root, text=f"Brain Rot Term:", font=("Helvetica", 25, "bold"))
+    term1.pack(pady=(5, 5))
+    
+    term2 = ttk.Label(root, text=f"{term}", font=("Helvetica", 50, "bold"))
+    term2.pack(pady=(0, 5))
+    
+    entry = ttk.Entry(root)
+    entry.pack(pady=(20, 0))
+    entry.insert(0, "Enter proper term here")
+    
+    result_label = ttk.Label(root, text="", foreground="red")
+    result_label.pack(pady=(5, 5))
+    
+    ttk.Button(root, text="Check", command=check).pack(pady=(5, 0))
+    
+    timer_label = ttk.Label(root, text="00:20", anchor="center", font=("DS-Digital", 24, "bold"), foreground="red") #CHANGE THIS FOR TIMER
+    timer_label.pack(pady=(10, 10))
+    
+    def update_timer():
+        global jover, root
+        
+        current_time = int(timer_label.cget("text").split(":")[1])
+        if jover:
+            return
+        elif current_time > 0:
+            current_time -= 1
+            timer_label.config(text=f"00:{current_time:02d}")
+            root.after(1000, update_timer)
+        else:
+            result_label.config(text="I'm sorry little one... The correct answer was: {currentsafe}", foreground="red") 
+            KILL()
+            jover = True
+            root.after(3000, root.destroy)
+            
+    if jover:
+        root.after(3000, root.destroy)
+        
+    
+    update_timer()
+    root.deiconify()
+    root.mainloop()
+    root.resizable(False, False)
+    root.attributes("-topmost", True)
+    root.protocol("WM_DELETE_WINDOW", spawn_tkinter)
+    root.protocol("WM_CLOSE", spawn_tkinter)
+    root.deiconify()
+    root.bell()       
+
+def KILL():
+    print("bye bye")
+
+
+prevtabcount = 0
+while True:
+    tab_count = get_chrome_tab_count()
+    print("HIII")
+    if tab_count > prevtabcount:
+        print("New tab opened!")
+        try:
+            spawn_tkinter()
+        except:
+            
+            root = tk.Tk()   
+            root.withdraw()
+            print("Error")
+    prevtabcount = tab_count
+    time.sleep(0.25)
