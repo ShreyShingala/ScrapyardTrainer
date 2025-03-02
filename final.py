@@ -1,3 +1,4 @@
+#Thank you to the goat michabyte for helping us
 import tkinter as tk
 from tkinter import ttk
 import random as rm
@@ -7,6 +8,7 @@ import threading
 import pygame
 import pyautogui
 import serial as ps
+import os 
 
 #MAKE BAD BOY
 
@@ -16,7 +18,26 @@ take the input
 replace
 '''
 
-#ser = ps.Serial('/dev/tty.usbserial-14240', 9600)
+#shrey@Shreys-Macbook-Pro ScrapyardTrainer % ls /dev/tty.usb* /dev/tty.usbmodem142401 /dev/tty.usbmodem142403
+ser = ps.Serial('/dev/tty.usbmodem142401', 115200)  # Ensure this is the correct port for pico
+ser1 = ps.Serial('/dev/tty.usbserial-14230', 9600) # Ensure this is the correct port for the arduino
+
+def KILL():
+    print("bye bye")
+    if not ser.is_open:
+        ser.open()
+    ser.write(b'e')
+    if not ser1.is_open:
+        ser1.open()
+    ser1.write(b'boom')
+    print("bye bye AGAIN") 
+
+def spawn(pick):
+    if pick == 1: 
+        spawn_tkinter()
+    else:
+        os.system("python3 vision.py")
+        #spawn_tkinter()
 
 def get_chrome_tab_count():
     script = '''
@@ -48,14 +69,17 @@ brainrot_terms = {
     "yeet": "throw",
     "salty": "bitter",
     "flex": "show off",
-    "Skibidi": "never",
-    "slay": "succeed",
+    "Skibidi": "toilet",
+    "slay": "good job",
     "Goblin mode": "crazy",
-    "Baby Gronk": "who?",
-    "kai cenat": "fierce",
+    "Baby Gronk": "streamer",
+    "kai cenat": "streamer",
     "Delulu": "delusional",
     "Fanum tax": "no",
-    "chat": "individuals"
+    "chat": "individuals",
+    "sigma grindset": "strong work ethic",
+    "skibidi Ohio rizz": "ultimate nonsense",
+    "let him cook": "let him do his thing"
 }
 
 def check(entry, currentsafe, result_label, root):
@@ -73,8 +97,12 @@ def check(entry, currentsafe, result_label, root):
         pygame.mixer.music.load("SoundEffect/fail.mp3")
         pygame.mixer.music.play()
         KILL()
+        ser.close()
         root.after(3000, root.destroy)
-        #PLAY FETTY WAP AFTER
+        #time.sleep(5.3)
+        #pygame.mixer.init()
+        #pygame.mixer.music.load("SoundEffect/fetty.mp3")
+        #pygame.mixer.music.play()
 
 def keep_focus(root):
     while True:
@@ -117,7 +145,7 @@ def spawn_tkinter():
     
     entry = ttk.Entry(root)
     entry.pack(pady=(20, 0))
-    entry.insert(0, "Enter proper term here")
+
     
     result_label = ttk.Label(root, text="", foreground="red")
     result_label.pack(pady=(5, 5))
@@ -137,6 +165,7 @@ def spawn_tkinter():
             if result_label.cget("text") == "":
                 result_label.config(text=f"I'm sorry little one... The correct answer was: {currentsafe}", foreground="red")
                 KILL()
+                ser.close()
                 root.after(3000, root.destroy)
             
     update_timer()
@@ -151,23 +180,22 @@ def spawn_tkinter():
     threading.Thread(target=keep_focus, args=(root,), daemon=True).start()
     root.mainloop()
 
-def KILL():
-    print("bye bye")
-    #ser.write(b'boom')
 
 def monitor_tabs(root):
     prevtabcount = 0
     while True:
         tab_count = get_chrome_tab_count()
         if tab_count > prevtabcount:
+            pick =  rm.randint(1,2)
             print("New tab opened!")
-            root.after(0, spawn_tkinter)
+            
+            root.after(0, lambda: spawn(pick))
         prevtabcount = tab_count
         time.sleep(0.25)
-
 
 root = tk.Tk()
 root.withdraw()
 threading.Thread(target=monitor_tabs, args=(root,), daemon=True).start()
 root.mainloop()
 monitor_tabs(root)
+ser.close()

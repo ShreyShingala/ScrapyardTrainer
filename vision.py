@@ -3,10 +3,20 @@ import math
 import numpy as np 
 import mediapipe as mp
 import random 
+import time
+import serial as ps
+
+
+ser = ps.Serial('/dev/tty.usbmodem142401', 115200)  # Ensure this is the correct port for pico
+#ser1 = ps.Serial('/dev/tty.usbmodem142301', 9600) # Ensure this is the correct port for the arduino
+
+running = False
 
 randgesture = random.randint(0,2)
 gesture_name = ""
-timer = 1 
+
+start_time = time.time()
+display_time = 5
 
 if randgesture == 0: 
     gesture_name = "THUMB'S UP"
@@ -42,7 +52,16 @@ def check(gesture, finger_x, finger_y):
         # W 
         if finger_x[1] < finger_x[3] < finger_x[2] < finger_x[4]:
             return safe()
-            
+    if gesture == 3: 
+        if finger_y[0] > finger_y[1] < finger_y[2] < finger_y[3]:
+            return safe()
+           
+def KILL():
+    print("bye bye")
+    if not ser.is_open:
+        ser.open()
+    ser.write(b'e')
+    print("bye bye AGAIN") 
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -77,7 +96,11 @@ while cap.isOpened():
                 cv2.destroyAllWindows()
 
     cv2.imshow("MAKE A " + gesture_name, frame)
-    if cv2.waitKey(1) & 0xFF == ord('q') or timer == 0:
+    if time.time() - start_time > display_time:
+        print("ada")
+        KILL()
+        break
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 cap.release()

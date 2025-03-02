@@ -49,14 +49,17 @@ brainrot_terms = {
     "yeet": "throw",
     "salty": "bitter",
     "flex": "show off",
-    "Skibidi": "never",
-    "slay": "succeed",
+    "Skibidi": "toilet",
+    "slay": "good job",
     "Goblin mode": "crazy",
-    "Baby Gronk": "who?",
-    "kai cenat": "fierce",
+    "Baby Gronk": "streamer",
+    "kai cenat": "streamer",
     "Delulu": "delusional",
     "Fanum tax": "no",
-    "chat": "individuals"
+    "chat": "individuals",
+    "sigma grindset": "strong work ethic",
+    "skibidi Ohio rizz": "ultimate nonsense",
+    "let him cook": "let him do his thing",
 }
 
 def check(entry, currentsafe, result_label, root):
@@ -74,8 +77,11 @@ def check(entry, currentsafe, result_label, root):
         pygame.mixer.music.load("SoundEffect/fail.mp3")
         pygame.mixer.music.play()
         KILL()
+        ser.close()
         root.after(3000, root.destroy)
-        #PLAY FETTY WAP AFTER
+        pygame.mixer.init()
+        pygame.mixer.music.load("SoundEffect/fetty.mp3")
+        pygame.mixer.music.play()
 
 def keep_focus(root):
     while True:
@@ -138,6 +144,7 @@ def spawn_tkinter():
             if result_label.cget("text") == "":
                 result_label.config(text=f"I'm sorry little one... The correct answer was: {currentsafe}", foreground="red")
                 KILL()
+                ser.close()
                 root.after(3000, root.destroy)
             
     update_timer()
@@ -154,20 +161,10 @@ def spawn_tkinter():
 
 def KILL():
     print("bye bye")
+    if not ser.is_open:
+        ser.open()
     ser.write(b'e')
     print("bye bye AGAIN")
-    
-    #try:
-    #    with open("/Volumes/CIRCUITPY/kill_signal.txt", "r+") as f:
-    #        value = f.read().strip()
-    #        new_value = "0" if value == "1" else "1"
-    #        f.seek(0)
-    #        f.write(new_value)
-    #        f.truncate()
-    #        print("CURRENT VALUE IS ", new_value)
-    #except FileNotFoundError:
-    #    print("File not found")
-    #ser.write(b'boom')
 
 def monitor_tabs(root):
     prevtabcount = 0
@@ -179,11 +176,9 @@ def monitor_tabs(root):
         prevtabcount = tab_count
         time.sleep(0.25)
 
-# with open("/Volumes/CIRCUITPY/kill_signal.txt", "w") as f:
-#     f.write("0")
-
 root = tk.Tk()
 root.withdraw()
 threading.Thread(target=monitor_tabs, args=(root,), daemon=True).start()
 root.mainloop()
 monitor_tabs(root)
+ser.close()
