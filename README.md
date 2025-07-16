@@ -1,5 +1,6 @@
 # ScrapyardTrainer
-Project made for Hack Club Scrapyard. Demo
+Project made for Hack Club Scrapyard. 
+Top 5 overall and winner of scrappiest subcatagory
 
 Uses for each file:
 Main.py
